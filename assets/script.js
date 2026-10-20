@@ -39,14 +39,50 @@ document.querySelectorAll('[data-link]').forEach((link) => {
   }
 });
 
+// A mailto: link may do nothing inside an embedded Streamlit page when the
+// visitor has no configured mail handler. Use Gmail's browser-based composer
+// for the main CTA and give visitors a one-click copy fallback.
 const emailButton = document.getElementById('email-button');
-
+const footerEmailLink = document.getElementById('footer-email-link');
+const contactEmailAddress = document.getElementById('contact-email-address');
+const copyEmailButton = document.getElementById('copy-email-button');
+const copyEmailFeedback = document.getElementById('copy-email-feedback');
 const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(PROFILE.email);
 if (validEmail) {
-  emailButton.href = `mailto:${PROFILE.email}?subject=Hello%20from%20your%20portfolio`;
+  const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(PROFILE.email)}&su=${encodeURIComponent('Hello from your portfolio')}`;
+  emailButton.href = gmailComposeUrl;
+  emailButton.target = '_blank';
+  emailButton.rel = 'noopener noreferrer';
   emailButton.hidden = false;
-
+  footerEmailLink.href = gmailComposeUrl;
+  contactEmailAddress.textContent = PROFILE.email;
 }
+
+copyEmailButton.addEventListener('click', async () => {
+  if (!validEmail) return;
+  let copied = false;
+  // Clipboard API can be blocked by iframe permissions. Fall back to a
+  // temporary selection, then give visitors text they can copy manually.
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(PROFILE.email);
+      copied = true;
+    }
+  } catch (_) { /* try the fallback */ }
+  if (!copied) {
+    const field = document.createElement('textarea');
+    field.value = PROFILE.email;
+    field.setAttribute('readonly', '');
+    field.style.position = 'fixed';
+    field.style.opacity = '0';
+    field.style.left = '-9999px';
+    document.body.appendChild(field);
+    field.select();
+    try { copied = document.execCommand('copy'); } catch (_) {}
+    field.remove();
+  }
+  copyEmailFeedback.textContent = copied ? 'Copied!' : `Select and copy: ${PROFILE.email}`;
+});
 
 document.getElementById('current-year').textContent = new Date().getFullYear();
 
