@@ -95,3 +95,12 @@
 }
 
 .project-card[id] { scroll-margin-top: 110px; }
+
+/* Contact CTA fallbacks for browsers without a configured mailto handler. */
+.contact-email-options { display: flex; flex-wrap: wrap; align-items: center; column-gap: 13px; row-gap: 8px; margin-top: 17px; color: var(--muted); font-size: .82rem; }
+#contact-email-address { overflow-wrap: anywhere; }
+.email-copy-button { border: none; padding: 0; background: transparent; color: var(--accent); font: inherit; font-weight: 700; cursor: pointer; }
+.email-copy-button:hover { text-decoration: underline; text-underline-offset: 3px; }
+.email-copy-button:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.email-copy-feedback { color: var(--accent); font-weight: 700; }
+@media (max-width: 500px) { .contact-email-options { font-size: .76rem; } }
